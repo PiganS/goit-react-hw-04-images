@@ -1,45 +1,41 @@
-import { Component } from 'react';
+import { useState } from 'react';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Header } from './Searchbar.styled';
 import { FaSearch } from 'react-icons/fa';
 
-export class Searchbar extends Component {
-  state = {
-    requestValue: '',
+export const Searchbar = ({ onSubmit }) => {
+  const [requestValue, setRequestValue] = useState('');
+
+  const handleRequestValueChange = evt => {
+    setRequestValue(evt.currentTarget.value.toLowerCase());
   };
 
-  handleRequestValueChange = evt => {
-    this.setState({ requestValue: evt.currentTarget.value.toLowerCase() });
-  };
-
-  handleSubmit = evt => {
+  const handleSubmit = evt => {
     evt.preventDefault();
-    if (this.state.requestValue.trim() === '') {
+    if (requestValue.trim() === '') {
       toast('Enter your request');
       return;
     }
-    this.props.onSubmit(this.state.requestValue);
-    this.setState({ requestValue: '' });
+    onSubmit(requestValue);
+    setRequestValue('');
   };
 
-  render() {
-    return (
-      <Header className="searchbar">
-        <form onSubmit={this.handleSubmit}>
-          <button type="submit" className="button">
-            <FaSearch />
-          </button>
+  return (
+    <Header className="searchbar">
+      <form onSubmit={handleSubmit}>
+        <button type="submit" className="button">
+          <FaSearch />
+        </button>
 
-          <input
-            value={this.state.requestValue}
-            onChange={this.handleRequestValueChange}
-            className="input"
-            type="text"
-            placeholder="Search images and photos"
-          />
-        </form>
-      </Header>
-    );
-  }
-}
+        <input
+          value={requestValue}
+          onChange={handleRequestValueChange}
+          className="input"
+          type="text"
+          placeholder="Search images and photos"
+        />
+      </form>
+    </Header>
+  );
+};

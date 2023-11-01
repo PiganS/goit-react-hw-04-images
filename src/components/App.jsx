@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useEffect, useState } from 'react';
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Container } from './App.styled';
@@ -9,87 +9,80 @@ import { toast } from 'react-toastify';
 import { Loader } from 'components/Loader/Loader';
 import { Modal } from './Modal/Modal';
 
-export class App extends Component {
-  state = {
-    requestValue: '',
-    hits: [],
-    page: 1,
-    total: null,
-    spiner: false,
-    showModal: false,
-    urlModal: null,
-  };
+export const App = () => {
+  const [value, setRequestValue] = useState('');
+  const [hits, setHits] = useState([]);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(null);
+  const [spiner, setSpiner] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [urlModal, setUrlModal] = useState(null);
+  const [isFirstRender, setIsFirstRender] = useState(true);
 
-  componentDidUpdate(_, prevState) {
-    const { page, requestValue } = this.state;
-    if (page !== prevState.page || requestValue !== prevState.requestValue) {
-      this.fetchImages();
+  useEffect(() => {
+    if (isFirstRender) {
+      setIsFirstRender(false);
+      return;
     }
-  }
+    fetchImages();
+  }, [value, page]);
 
-  fetchImages = async () => {
-    const { page, hits, requestValue } = this.state;
+  const fetchImages = async () => {
     try {
-      this.setState({ spiner: true });
+      setSpiner(true);
 
-      const data = await fetchQuery(requestValue, page);
+      const { hits: newGallery, totalHits } = await fetchQuery(value, page);
 
-      if (data.hits.length === 0) {
+      if (newGallery.length === 0) {
         toast.error('No images found for your query!');
         return;
       }
 
-      const newGallery = data.hits;
-      const totalHits = data.totalHits;
-
       if (page === 1) {
         toast.info(`Found: ${totalHits} images for your request`);
       }
-
-      this.setState({
-        hits: [...hits, ...newGallery],
-        total: totalHits,
-        spiner: false,
-      });
+      setHits([...hits, ...newGallery]);
+      setTotal(totalHits);
+      setSpiner(false);
     } catch (error) {
       toast.error('Error fetching data: ', error);
     } finally {
-      this.setState({ spiner: false });
+      setSpiner(false);
     }
   };
 
-  handleFormSubmit = requestValue => {
-    if (this.state.requestValue === requestValue) {
+  const handleFormSubmit = requestValue => {
+    if (value === requestValue) {
       return;
     }
-    this.setState({ requestValue: requestValue, hits: [], page: 1 });
+    setRequestValue(requestValue);
+    setHits([]);
+    setPage(1);
   };
 
-  handleLoadMore = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
+  const handleLoadMore = () => {
+    setPage(page => page + 1);
   };
 
-  openModal = urlModal => {
-    this.setState({ urlModal: urlModal, showModal: true });
+  const openModal = urlModal => {
+    setUrlModal(urlModal);
+    setShowModal(true);
   };
 
-  closeModal = () => {
-    this.setState({ showModal: false });
+  const closeModal = () => {
+    setShowModal(false);
   };
 
-  render() {
-    const { spiner, hits, total, showModal, urlModal } = this.state;
-    return (
-      <Container>
-        <Searchbar onSubmit={this.handleFormSubmit} />
-        {spiner && <Loader />}
-        <ImageGallery hits={hits} openModal={this.openModal} />
-        {hits.length > 0 && hits.length < total && (
-          <Button onClick={this.handleLoadMore} />
-        )}
-        {showModal && <Modal data={urlModal} closeModal={this.closeModal} />}
-        <TostBox />
-      </Container>
-    );
-  }
-}
+  return (
+    <Container>
+      <Searchbar onSubmit={handleFormSubmit} />
+      {spiner && <Loader />}
+      <ImageGallery hits={hits} openModal={openModal} />
+      {hits.length > 0 && hits.length < total && (
+        <Button onClick={handleLoadMore} />
+      )}
+      {showModal && <Modal data={urlModal} closeModal={closeModal} />}
+      <TostBox />
+    </Container>
+  );
+};
