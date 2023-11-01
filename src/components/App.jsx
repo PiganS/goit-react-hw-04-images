@@ -17,11 +17,9 @@ export const App = () => {
   const [spiner, setSpiner] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [urlModal, setUrlModal] = useState(null);
-  const [isFirstRender, setIsFirstRender] = useState(true);
 
   useEffect(() => {
-    if (isFirstRender) {
-      setIsFirstRender(false);
+    if (!value) {
       return;
     }
     fetchImages();
