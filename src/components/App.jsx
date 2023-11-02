@@ -33,7 +33,8 @@ export const App = () => {
         if (page === 1) {
           toast.info(`Found: ${totalHits} images for your request`);
         }
-        setHits([...hits, ...newGallery]);
+
+        setHits(prevHits => [...prevHits, ...newGallery]);
         setTotal(totalHits);
         setSpiner(false);
       } catch (error) {
@@ -46,8 +47,9 @@ export const App = () => {
     if (!value) {
       return;
     }
+
     fetchImages();
-  }, [value, page]);
+  }, [value, page, hits]);
 
   const handleFormSubmit = requestValue => {
     if (value === requestValue) {
