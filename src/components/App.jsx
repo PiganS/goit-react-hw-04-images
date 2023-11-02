@@ -19,35 +19,35 @@ export const App = () => {
   const [urlModal, setUrlModal] = useState(null);
 
   useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        setSpiner(true);
+
+        const { hits: newGallery, totalHits } = await fetchQuery(value, page);
+
+        if (newGallery.length === 0) {
+          toast.error('No images found for your query!');
+          return;
+        }
+
+        if (page === 1) {
+          toast.info(`Found: ${totalHits} images for your request`);
+        }
+        setHits([...hits, ...newGallery]);
+        setTotal(totalHits);
+        setSpiner(false);
+      } catch (error) {
+        toast.error('Error fetching data: ', error);
+      } finally {
+        setSpiner(false);
+      }
+    };
+
     if (!value) {
       return;
     }
     fetchImages();
   }, [value, page]);
-
-  const fetchImages = async () => {
-    try {
-      setSpiner(true);
-
-      const { hits: newGallery, totalHits } = await fetchQuery(value, page);
-
-      if (newGallery.length === 0) {
-        toast.error('No images found for your query!');
-        return;
-      }
-
-      if (page === 1) {
-        toast.info(`Found: ${totalHits} images for your request`);
-      }
-      setHits([...hits, ...newGallery]);
-      setTotal(totalHits);
-      setSpiner(false);
-    } catch (error) {
-      toast.error('Error fetching data: ', error);
-    } finally {
-      setSpiner(false);
-    }
-  };
 
   const handleFormSubmit = requestValue => {
     if (value === requestValue) {
