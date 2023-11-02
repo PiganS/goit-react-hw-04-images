@@ -3,18 +3,17 @@ import { StyledModal, StyledOverlay } from './Modal.styled';
 
 export const Modal = ({ closeModal, data }) => {
   useEffect(() => {
-    window.addEventListener('keydown', keyboardPress);
+    const keyboardPress = evt => {
+      if (evt.code === 'Escape') {
+        closeModal();
+      }
+    };
 
+    window.addEventListener('keydown', keyboardPress);
     return () => {
       window.removeEventListener('keydown', keyboardPress);
     };
-  }, []);
-
-  const keyboardPress = evt => {
-    if (evt.code === 'Escape') {
-      closeModal();
-    }
-  };
+  }, [closeModal]);
 
   const clickOverlay = evt => {
     if (evt.currentTarget === evt.target) {
